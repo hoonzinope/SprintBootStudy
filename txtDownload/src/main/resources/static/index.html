@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+</head>
+<body>
+<p><input id= "date" type="date"></p>
+<p><input id= "submit" type="submit" value="Submit"></p>
+</body>
+<script>
+    $( document ).ready(function() {
+
+        $("#submit").on("click", function() {
+            let date = $("#date").text();
+            let data_url = "";
+            $.ajax({
+                type: "POST",
+                url : "/apiCall",
+                data: {
+                    date : date,
+                },
+                dataType: 'text' ,
+                success: function(result){
+                    //작업이 성공적으로 발생했을 경우
+                    console.log(result);
+                    data_url = result;
+                },
+                error:function(){
+                    //에러가 났을 경우 실행시킬 코드
+                }
+            }).done(function() {
+              var link = document.createElement("a");
+              link.setAttribute("id","download_link");
+              link.setAttribute("download","sample");
+              link.setAttribute("href",data_url)
+              link.click();
+              link.remove();
+              });
+        });
+
+    });
+</script>
+</html>
