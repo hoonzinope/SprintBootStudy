@@ -74,4 +74,13 @@ public class OrderRepository {
         return query.getResultList();
     }
 
+    // fetch join! proxy 객체 없이, LAZY loading 아니고, 실제값으로 채워서 가져오기!!
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                "select o from Order o"+
+                        " join fetch o.member m "+
+                        " join fetch o.delivery d" , Order.class
+        ).getResultList();
+
+    }
 }

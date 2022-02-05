@@ -39,7 +39,16 @@ public class OrderSimpleApiController {
                 .map(o -> new SimpleOrderDto(o))
                 .collect(Collectors.toList());
         return result;
-    }
+    } // entity 대신 DTO 로 변환 (api 스펙 맞출땐 엔티티가 아니라 DTO로 감싼다)
+
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3() {
+        List<Order> order = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = order.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+    } // 페치조인으로
 
     @Data
     static class SimpleOrderDto {
