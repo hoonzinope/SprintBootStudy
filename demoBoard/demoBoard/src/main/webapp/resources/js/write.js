@@ -29,7 +29,9 @@
           url : "writePost",
           data : JSON.stringify(data),
           contentType: 'application/json',
-          dataType : "json",
+          success : function() {
+            location.href = "/postBoard";
+          }
         });
       });
     }

@@ -17,18 +17,9 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public JSONObject getPost(Long seq) {
+    public Post getPostEntity(Long seq) {
         Optional<Post> optionalPost = postRepository.findById(seq);
-        JSONObject result = new JSONObject();
-        if(optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-            result.put("seq", post.getSeq());
-            result.put("title", post.getTitle());
-            result.put("content", post.getContent());
-            result.put("user", post.getUser());
-            result.put("createAt", post.getCreateAt());
-        }
-        return result;
+        return optionalPost.orElse(null);
     }
 
     public JSONArray getPostAll() {

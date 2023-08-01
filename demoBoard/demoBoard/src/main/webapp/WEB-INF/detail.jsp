@@ -37,15 +37,21 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     </section>
     <section>
         <h6>댓글 등록</h6>
-
+        <dt>작성자</dt>
+        <dd><input id="commentUser"/></dd>
+        <dt>댓글</dt>
+        <dd><input id="commentContent"/></dd>
+        <dd><input type="button" id="commentSubmit" value="댓글등록"/></dd>
     </section>
     <section>
         <h6>댓글 목록</h6>
-        
+        <div id="commentList">
+        </div>
     </section>
   </body>
     <script type="text/javascript">
         var postDetail = ${postDetail};
+        var comments = ${comments};
     </script>
   <script
   type="text/javascript"
