@@ -42,6 +42,6 @@ public class Comment {
     @JoinColumn(name="parent", referencedColumnName = "seq")
     private Comment parent;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parent")
     private List<Comment> reply;
 }

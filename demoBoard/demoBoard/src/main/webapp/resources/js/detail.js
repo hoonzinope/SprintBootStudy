@@ -77,6 +77,9 @@
                   +`</div>`;
 
         $(reply).append(div);
+
+        $("#replyUser").val("익명"+random());
+
         commentTable.cancelReply();
         commentTable.replyPosting();
       });
