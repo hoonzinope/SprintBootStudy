@@ -80,43 +80,71 @@
     },
     drawComments : function() {
       $("#commentList").empty();
-      // comments.sort(function(a,b) {
-      //   if(a["REF"] == b["REF"]) {
-      //     if(a["REFORDER"] == b["REFORDER"]) {
-      //       return a["parentSeq"] - b["parentSeq"];
-      //     }
-      //     return a["REFORDER"] - b["REFORDER"];
-      //   }
-      //   return a["REF"] - b["REF"];
-      // });
       this.orderComments();
 
       for(let comment of this.comments) {
-        let comment_id = comment["seq"];
-        let REF = comment["REF"];
-        let REFORDER = comment["REFORDER"];
-        let REFLEVEL = comment["REFLEVEL"];
-        let depth = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(REFLEVEL);//↳
-        
-        let parentName = comment["parentName"];
-        if(parentName!="") { parentName = "@"+parentName;}
-
-        let user = comment.user;
-        let content = comment.content;
-        let createAt = comment.createAt.replace("T", " ");
-        let content_dd = `<dd>${depth} ${parentName} ${content} // ${user} ${createAt}</dd>`;
-        // let createAt_dd = `<dd>${createAt}</dd>`;
-
-        let button_dd = `<dd class="reply" ref="${REF}" depth="${REFLEVEL}" parent_id=${comment_id}><input class="replyWrite" type="button" value="대댓 작성"></dd>`
-        let replyList = `<dd class="replyList"></dd>`;
-        let div = `<div id="${comment_id}">`
-                  +content_dd
-                  +button_dd
-                  +replyList
-                  +`</div>`;
+        let div = this.divRowSetting(comment);
         $("#commentList").append(div);  
         this.replyWrite();
       }
+      let visiblePages = 5;
+      let totalPages = this.comments.length % visiblePages == 0 ?
+      this.comments.length / 5 : Math.floor(this.comments.length / 5)+1;
+        $('#pagination-div').twbsPagination({
+          totalPages: totalPages,	// 총 페이지 번호 수
+          visiblePages: visiblePages,	// 하단에서 한번에 보여지는 페이지 번호 수
+          startPage : 1, // 시작시 표시되는 현재 페이지
+          initiateStartPageClick: true,	// 플러그인이 시작시 페이지 버튼 클릭 여부 (default : true)
+          first : "첫 페이지",	// 페이지네이션 버튼중 처음으로 돌아가는 버튼에 쓰여 있는 텍스트
+          prev : "이전 페이지",	// 이전 페이지 버튼에 쓰여있는 텍스트
+          next : "다음 페이지",	// 다음 페이지 버튼에 쓰여있는 텍스트
+          last : "마지막 페이지",	// 페이지네이션 버튼중 마지막으로 가는 버튼에 쓰여있는 텍스트
+          nextClass : "page-item next",	// 이전 페이지 CSS class
+          prevClass : "page-item prev",	// 다음 페이지 CSS class
+          lastClass : "page-item last",	// 마지막 페이지 CSS calss
+          firstClass : "page-item first",	// 첫 페이지 CSS class
+          pageClass : "page-item",	// 페이지 버튼의 CSS class
+          activeClass : "active",	// 클릭된 페이지 버튼의 CSS class
+          disabledClass : "disabled",	// 클릭 안된 페이지 버튼의 CSS class
+          anchorClass : "page-link",	//버튼 안의 앵커에 대한 CSS class
+          onPageClick: function (event, page) {
+            //클릭 이벤트
+            // $("#")
+            $("#commentList").empty();
+            let start = (page-1)*visiblePages;
+            let end = page*visiblePages < commentTable.comments.length 
+            ? page*visiblePages : commentTable.comments.length;
+            for(let i = start; i < end; i++) {
+              let div = commentTable.divRowSetting(commentTable.comments[i]);
+              $("#commentList").append(div);
+              commentTable.replyWrite();
+            }
+            console.log("클릭", page);
+          }
+      });
+    },
+    divRowSetting : function(comment) {
+      let comment_id = comment["seq"];
+      let REF = comment["REF"];
+      let REFORDER = comment["REFORDER"];
+      let REFLEVEL = comment["REFLEVEL"];
+      let depth = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(REFLEVEL);//↳
+      
+      let parentName = comment["parentName"];
+      if(parentName!="") { parentName = "@"+parentName;}
+
+      let user = comment.user;
+      let content = comment.content;
+      let createAt = comment.createAt.replace("T", " ");
+      let content_dd = `<dd>${depth} ${parentName} ${content} // ${user} ${createAt}</dd>`;
+      // let createAt_dd = `<dd>${createAt}</dd>`;
+
+      let button_dd = `<dd class="reply" ref="${REF}" depth="${REFLEVEL}" parent_id=${comment_id}><input class="replyWrite" type="button" value="대댓 작성"></dd>`
+      let div = `<div id="${comment_id}">`
+                +content_dd
+                +button_dd
+                +`</div>`;
+      return div;
     },
     replyWrite : function() {
       $(".replyWrite").off("click").on("click", function() {
