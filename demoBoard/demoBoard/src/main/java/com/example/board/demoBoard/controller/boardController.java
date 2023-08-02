@@ -30,32 +30,6 @@ public class boardController {
         model.addAttribute("posts",postService.getPostAll());
         return "board";
     }
-
-    @GetMapping("/postDetail")
-    public String getPostDetail(@RequestParam(name = "seq") Long seq, Model model) {
-        Post post = postService.getPostEntity(seq);
-        JSONArray comments = commentService.getComments(post);
-
-        model.addAttribute("postDetail", post.getPostJson());
-        model.addAttribute("comments", comments);
-        return "detail";
-    }
-
-    @PostMapping("/commentInsert")
-    @ResponseStatus
-    public ResponseEntity<Comment> uploadComment(@RequestBody InsertCommentDto commentDto, HttpServletRequest request){
-        String ip = request.getHeader("X-FORWARDED-FOR");
-        if (ip == null)
-            ip = request.getRemoteAddr();
-        commentDto.setIp(ip);
-        System.out.println(commentDto);
-
-        Post postEntity = postService.getPostEntity(commentDto.getPostSeq());
-        commentDto.setPost(postEntity);
-        commentService.saveComment(commentDto);
-        return ResponseEntity.status(200).build();
-    }
-
     @GetMapping("/writePost")
     public String getWriteBoardPage() {
         return "write";
@@ -73,5 +47,43 @@ public class boardController {
         Post post = postDto.toEntity();
         postService.savePost(post);
         return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/postDetail")
+    public String getPostDetail(@RequestParam(name = "seq") Long seq, Model model) {
+        Post post = postService.getPostEntity(seq);
+        JSONArray comments = commentService.getComments(post);
+
+        model.addAttribute("postDetail", post.getPostJson());
+        model.addAttribute("comments", comments);
+        return "detail";
+    }
+    @PostMapping("/commentInsert")
+    @ResponseStatus
+    public ResponseEntity<Comment> uploadComment(@RequestBody InsertCommentDto commentDto, HttpServletRequest request){
+        String ip = request.getHeader("X-FORWARDED-FOR");
+        if (ip == null)
+            ip = request.getRemoteAddr();
+        commentDto.setIp(ip);
+        System.out.println(commentDto);
+
+        Post postEntity = postService.getPostEntity(commentDto.getPostSeq());
+        commentDto.setPost(postEntity);
+
+        // parent 존재시
+        if(commentDto.getParentSeq() != null){
+            Comment comment = commentService.getCommentBySeq(commentDto.getParentSeq());
+            commentDto.setParent(comment);
+        }
+
+        commentService.saveComment(commentDto);
+        return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/getComments")
+    @ResponseBody
+    public String getCommentByPostSeq(@RequestParam(name = "postSeq") Long postSeq) {
+        Post post = postService.getPostEntity(postSeq);
+        return commentService.getComments(post).toString();
     }
 }

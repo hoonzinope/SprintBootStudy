@@ -1,5 +1,8 @@
 package com.example.board.demoBoard.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,10 +41,10 @@ public class Comment {
     @Column(name="createAt")
     private LocalDateTime createAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="parent", referencedColumnName = "seq")
     private Comment parent;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parent")
-    private List<Comment> reply;
+    public String parentName(){ return this.parent != null ? this.parent.getUser() : ""; }
+    public Long parentSeq() { return this.parent != null ? this.parent.getSeq() : -1L; }
 }

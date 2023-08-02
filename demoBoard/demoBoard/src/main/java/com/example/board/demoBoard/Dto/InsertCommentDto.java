@@ -15,6 +15,8 @@ public class InsertCommentDto {
     private int refLevel;
     private Long postSeq;
     private Post post;
+    private Long parentSeq;
+    private Comment parent;
 
     public Comment toEntity() {
         return Comment.builder()
@@ -25,6 +27,7 @@ public class InsertCommentDto {
                 .REFORDER(this.refOrder)
                 .REFLEVEL(this.refLevel)
                 .post(this.post)
+                .parent(this.parent)
                 .build();
     }
 }

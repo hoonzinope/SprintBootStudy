@@ -27,30 +27,89 @@
       this.comments = comments;
       this.drawComments();
     },
-    drawComments : function() {
-      $("#commentList").empty();
-      comments.sort(function(a,b) {
+    getComments : function() {
+      let url = new URL(location.href);
+      let postSeq = Number(url.searchParams.get("seq"));
+      $.ajax({
+        url : "getComments",
+        method : "GET",
+        contentType: 'application/json',
+        dataType : "json",
+        data : { "postSeq" : postSeq },
+        success : function(data) {
+          commentTable.comments = data;
+          commentTable.drawComments();
+        }
+      })
+    },
+    orderComments : function(){
+      this.comments.sort(function(a,b) {
         if(a["REF"] == b["REF"]) {
+          if(a["REFORDER"] == b["REFORDER"]) {
+            return a["parentSeq"] - b["parentSeq"];
+          }
           return a["REFORDER"] - b["REFORDER"];
         }
         return a["REF"] - b["REF"];
       });
 
+      let parents = [];
+      this.comments.forEach((comment) => {
+        if(comment.parentSeq == -1) parents.push(comment);
+      });
+
+      function dfs(orgComment, comments) {
+        let result = [orgComment];
+        for(let i = 0; i < comments.length; i++) {
+          let comment = comments[i];
+          if(orgComment.seq == comment.parentSeq) {
+            // result.push(comment);
+            let children = dfs(comment, comments.slice(i, comments.length));
+            result = result.concat(children);
+          }
+        }
+        return result;
+      }
+
+      let result = [];
+      for(let comment of parents) {
+        let children = dfs(comment, this.comments);
+        result = result.concat(children);
+      }
+      this.comments = result;
+    },
+    drawComments : function() {
+      $("#commentList").empty();
+      // comments.sort(function(a,b) {
+      //   if(a["REF"] == b["REF"]) {
+      //     if(a["REFORDER"] == b["REFORDER"]) {
+      //       return a["parentSeq"] - b["parentSeq"];
+      //     }
+      //     return a["REFORDER"] - b["REFORDER"];
+      //   }
+      //   return a["REF"] - b["REF"];
+      // });
+      this.orderComments();
+
       for(let comment of this.comments) {
+        let comment_id = comment["seq"];
         let REF = comment["REF"];
         let REFORDER = comment["REFORDER"];
         let REFLEVEL = comment["REFLEVEL"];
-        let depth = " ".repeat(REFLEVEL);
+        let depth = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(REFLEVEL);//↳
+        
+        let parentName = comment["parentName"];
+        if(parentName!="") { parentName = "@"+parentName;}
 
         let user = comment.user;
         let content = comment.content;
         let createAt = comment.createAt.replace("T", " ");
-        let content_dd = `<dd>${depth} ${user}: ${content} // ${createAt}</dd>`;
+        let content_dd = `<dd>${depth} ${parentName} ${content} // ${user} ${createAt}</dd>`;
         // let createAt_dd = `<dd>${createAt}</dd>`;
 
-        let button_dd = `<dd class="reply" ref="${REF}"><input class="replyWrite" type="button" value="대댓 작성"></dd>`
+        let button_dd = `<dd class="reply" ref="${REF}" depth="${REFLEVEL}" parent_id=${comment_id}><input class="replyWrite" type="button" value="대댓 작성"></dd>`
         let replyList = `<dd class="replyList"></dd>`;
-        let div = `<div>`
+        let div = `<div id="${comment_id}">`
                   +content_dd
                   +button_dd
                   +replyList
@@ -62,8 +121,10 @@
     replyWrite : function() {
       $(".replyWrite").off("click").on("click", function() {
         let reply = $(this).parent();
-        let reply_ref = $(reply).attr("ref");
-        commentTable.allCancelExcept(reply_ref);
+        let parent_ref = $(reply).attr("ref");
+        let parent_depth = $(reply).attr("depth");
+        let parent_id = $(reply).attr("parent_id");
+        commentTable.allCancelExcept(parent_ref);
         $(reply).empty();
         
         let div = `<div>`
@@ -71,9 +132,9 @@
                   <dt>작성자</dt>
                   <dd><input id="replyUser"/></dd>
                   <dt>대댓글</dt>
-                  <dd><input id="replyContent"/><input id="replyREF" value="${reply_ref}" hidden></dd>
-                  <dd><input type="button" class="replySubmit" data_tab="${reply_ref}" value="대댓글등록"/>
-                  <input type="button" class="cancelReply" data_tab="${reply_ref}" value="취소"/></dd>`
+                  <dd><input id="replyContent"/><input id="replyREF" value="${parent_ref}" hidden></dd>
+                  <dd><input type="button" class="replySubmit" parent_ref="${parent_ref}" parent_depth="${parent_depth}" parent_id = "${parent_id}"value="대댓글등록"/>
+                  <input type="button" class="cancelReply" data_tab="${parent_ref}" value="취소"/></dd>`
                   +`</div>`;
 
         $(reply).append(div);
@@ -110,10 +171,35 @@
     },
     replyPosting : function() {
       $(".replySubmit").off("click").on("click", function() {
-        let reply_ref = $(this).attr("data_tab");
+        let url = new URL(location.href);
+        let postSeq = Number(url.searchParams.get("seq"));
+
+        let parent_ref = Number($(this).attr("parent_ref"));
+        let parent_depth = Number($(this).attr("parent_depth"));
+        let parent_id = Number($(this).attr("parent_id"));
+
         let replyUser = $("#replyUser").val();
         let replyContent = $("#replyContent").val();
         
+        let data = {
+          "ref" : parent_ref,
+          "refOrder" : 0,
+          "refLevel" : parent_depth+1,
+          "user" : replyUser,
+          "content" : replyContent,
+          "parentSeq" : parent_id,
+          "postSeq" : postSeq,
+        }
+        $.ajax({
+          url : "commentInsert",
+          method : "POST",
+          contentType: 'application/json',
+          // dataType : "json",
+          data : JSON.stringify(data),
+          success : function(data) {
+            commentTable.getComments();
+          }
+        });
       });
     },
   }
@@ -134,7 +220,7 @@
         let url = new URL(location.href);
         let postSeq = Number(url.searchParams.get("seq"));
 
-        let REF_ = 0;//commentTable.comments.length;
+        let REF_ = commentTable.comments.length;
         let REFORDER = 0;
         let REFLEVEL = 0;
 
