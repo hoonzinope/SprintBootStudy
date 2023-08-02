@@ -82,14 +82,21 @@
       $("#commentList").empty();
       this.orderComments();
 
-      for(let comment of this.comments) {
-        let div = this.divRowSetting(comment);
-        $("#commentList").append(div);  
-        this.replyWrite();
-      }
+      // for(let comment of this.comments) {
+      //   let div = this.divRowSetting(comment);
+      //   $("#commentList").append(div);  
+      //   this.replyWrite();
+      // }
       let visiblePages = 5;
       let totalPages = this.comments.length % visiblePages == 0 ?
       this.comments.length / 5 : Math.floor(this.comments.length / 5)+1;
+      // $('#pagination-div').twbsPagination('destroy');
+      if ($("#pagination-div").length != 0) {
+        $("#pagination-div").remove();
+        $("#commentList").after(
+            '<div id="pagination-div" ></div>'
+        );
+    }
         $('#pagination-div').twbsPagination({
           totalPages: totalPages,	// 총 페이지 번호 수
           visiblePages: visiblePages,	// 하단에서 한번에 보여지는 페이지 번호 수
@@ -108,8 +115,6 @@
           disabledClass : "disabled",	// 클릭 안된 페이지 버튼의 CSS class
           anchorClass : "page-link",	//버튼 안의 앵커에 대한 CSS class
           onPageClick: function (event, page) {
-            //클릭 이벤트
-            // $("#")
             $("#commentList").empty();
             let start = (page-1)*visiblePages;
             let end = page*visiblePages < commentTable.comments.length 
@@ -119,7 +124,6 @@
               $("#commentList").append(div);
               commentTable.replyWrite();
             }
-            console.log("클릭", page);
           }
       });
     },
@@ -128,7 +132,7 @@
       let REF = comment["REF"];
       let REFORDER = comment["REFORDER"];
       let REFLEVEL = comment["REFLEVEL"];
-      let depth = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(REFLEVEL);//↳
+      let depth = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".repeat(REFLEVEL);//↳
       
       let parentName = comment["parentName"];
       if(parentName!="") { parentName = "@"+parentName;}
