@@ -9,22 +9,26 @@ pageEncoding="UTF-8"%>
   <title>music dashBoard</title>
   <link
         rel="stylesheet"
-        href="./resources/css/index.css"
+        href="./resources/css/search/searchTrack.css"
         crossorigin="anonymous"
         referrerpolicy="no-referrer"
     />
 
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js"></script>
 </head>
 <body>
   <div class="wrap">
-    <div class="goingHome">search & comment</div>
+    <div class="goingHome"><a href = "/musicBoard">home</a></div>
     <div class="search">
        <select class="selectTerm">
+          <!-- <option value="track">track</option> -->
           <option value="track">track</option>
           <option value="album">album</option>
           <option value="artist">artist</option>
+
        </select>
        <input type="text" class="searchTerm" placeholder="What music are you looking for?">
        <button type="submit" class="searchButton">
@@ -34,7 +38,17 @@ pageEncoding="UTF-8"%>
       </button>
     </div>
  </div>
+ <div class="content">
+  <div id="pagination_div"></div> 
+  <div id="track_list"> </div>
+</div>
+<a href="#" class="btn_gotop">
+  <span class="glyphicon glyphicon-chevron-up">
+  </span>
+</a>
 </body>
-<script type="text/javascript" src="./resources/js/index.js">
+<script>
+  let searchResult = ${searchResult};
 </script>
+<script type="text/javascript" src="./resources/js/search/searchTrack.js"></script>
 </html>

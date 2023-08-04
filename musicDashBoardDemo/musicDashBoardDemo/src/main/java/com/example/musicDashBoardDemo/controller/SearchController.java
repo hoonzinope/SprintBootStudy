@@ -34,15 +34,15 @@ public class SearchController {
         // API 사용
         if(references.equals("artist")) {
             spotifySeach = new SpotifySeach(new ArtistSearch());
-            pageName = "searchArtist";
+            pageName = "search/searchArtist";
         }
         else if(references.equals("track")) {
             spotifySeach = new SpotifySeach(new TrackSearch());
-            pageName = "searchTrack";
+            pageName = "search/searchTrack";
         }
         else if(references.equals("album")) {
             spotifySeach = new SpotifySeach(new AlbumSearch());
-            pageName = "searchAlbum";
+            pageName = "search/searchAlbum";
         }
         else {
             throw new Exception("references not suitable");
